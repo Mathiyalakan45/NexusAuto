@@ -1,11 +1,13 @@
 "use client";
 
-import { useAuth, useAuthActions } from "@/lib/store/authStore";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAuth, useAuthActions } from '@/lib/store/authStore';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import NotificationBell from '@/components/notification/NotificationBell';
 
 export default function Navigation() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, isAuthenticated } = useAuth();
   const { logout } = useAuthActions();
 
@@ -21,6 +23,11 @@ export default function Navigation() {
           {
             name: "Profile",
             href: "/profile",
+            roles: ["ROLE_CUSTOMER", "ROLE_EMPLOYEE", "ROLE_ADMIN"],
+          },
+          {
+            name: "Notifications",
+            href: "/notifications",
             roles: ["ROLE_CUSTOMER", "ROLE_EMPLOYEE", "ROLE_ADMIN"],
           },
           ...(user?.role === "ROLE_CUSTOMER"
@@ -61,6 +68,10 @@ export default function Navigation() {
       link.roles.includes(user?.role || ""),
   );
 
+  const isActiveLink = (href: string) => {
+    return pathname === href;
+  };
+
   return (
     <nav className="bg-white shadow-lg">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -76,7 +87,11 @@ export default function Navigation() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-700"
+                  className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors ${
+                    isActiveLink(link.href)
+                      ? 'border-blue-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
                 >
                   {link.name}
                 </Link>
@@ -88,6 +103,9 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {isAuthenticated && user ? (
               <div className="flex items-center space-x-4">
+                {/* Notifications */}
+                <NotificationBell />
+                
                 {/* User info */}
                 <div className="hidden sm:flex sm:items-center sm:space-x-2">
                   <span className="text-sm text-gray-700">
@@ -133,7 +151,11 @@ export default function Navigation() {
             <Link
               key={link.name}
               href={link.href}
-              className="block border-l-4 border-transparent py-2 pr-4 pl-3 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+              className={`block border-l-4 py-2 pr-4 pl-3 text-base font-medium transition-colors hover:bg-gray-50 ${
+                isActiveLink(link.href)
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              }`}
             >
               {link.name}
             </Link>
