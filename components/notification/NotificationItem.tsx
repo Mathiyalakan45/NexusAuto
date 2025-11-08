@@ -11,7 +11,7 @@ interface NotificationItemProps {
 }
 
 export default function NotificationItem({ notification }: NotificationItemProps) {
-  const { markAsRead, deleteNotification } = useNotificationStore();
+  const { syncMarkAsRead, syncDeleteNotification } = useNotificationStore();
   const router = useRouter();
 
   const getTypeStyles = (type: Notification['type']) => {
@@ -56,16 +56,16 @@ export default function NotificationItem({ notification }: NotificationItemProps
     }
   };
 
-  const handleMarkAsRead = () => {
+  const handleMarkAsRead = async () => {
     if (!notification.isRead) {
-      markAsRead(notification.id);
+      await syncMarkAsRead(notification.id);
     }
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this notification?')) {
-      deleteNotification(notification.id);
+      await syncDeleteNotification(notification.id);
     }
   };
 
@@ -95,7 +95,7 @@ export default function NotificationItem({ notification }: NotificationItemProps
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3 flex-1">
-          <div className="flex-shrink-0 mt-0.5">
+          <div className="shrink-0 mt-0.5">
             {getTypeIcon(notification.type)}
           </div>
           
