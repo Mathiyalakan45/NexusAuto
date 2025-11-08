@@ -4,7 +4,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useNotificationStore } from "@/lib/store/notificationStore";
 import { formatRelativeTime } from "@/lib/utils/dateUtils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function NotificationsPage() {
   return (
@@ -19,14 +19,20 @@ function NotificationsContent() {
   const {
     notifications,
     unreadCount,
-    markAllAsRead,
-    clearAll,
-    markAsRead,
-    deleteNotification,
-    getUnreadNotifications
+    syncMarkAllAsRead,
+    syncClearAll,
+    syncMarkAsRead,
+    syncDeleteNotification,
+    getUnreadNotifications,
+    loadNotificationsFromBackend
   } = useNotificationStore();
 
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+
+  // Load notifications on component mount
+  useEffect(() => {
+    loadNotificationsFromBackend();
+  }, [loadNotificationsFromBackend]);
 
   const unreadNotifications = getUnreadNotifications();
   
@@ -34,23 +40,23 @@ function NotificationsContent() {
     ? unreadNotifications 
     : notifications;
 
-  const handleMarkAllAsRead = () => {
-    markAllAsRead();
+  const handleMarkAllAsRead = async () => {
+    await syncMarkAllAsRead();
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm("Are you sure you want to clear all notifications?")) {
-      clearAll();
+      await syncClearAll();
     }
   };
 
-  const handleMarkAsRead = (id: string) => {
-    markAsRead(id);
+  const handleMarkAsRead = async (id: string) => {
+    await syncMarkAsRead(id);
   };
 
-  const handleDeleteNotification = (id: string) => {
+  const handleDeleteNotification = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this notification?")) {
-      deleteNotification(id);
+      await syncDeleteNotification(id);
     }
   };
 
@@ -203,7 +209,7 @@ function NotificationsContent() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4 flex-1">
-                      <div className="flex-shrink-0 mt-0.5">
+                      <div className="shrink-0 mt-0.5">
                         {getTypeIcon(notification.type)}
                       </div>
                       
